@@ -287,11 +287,11 @@ td.negative{color:var(--red);font-family:var(--font-m);font-size:11.5px;}
       <div class="login-s">Manage Google &amp; Meta ad accounts from one place</div>
       <div class="fg">
         <label class="fl">Email address</label>
-        <input class="fi" type="email" placeholder="you@company.com" value="admin@advertisingpro.xyz">
+        <input class="fi" type="email" placeholder="you@company.com" value="">
       </div>
       <div class="fg">
         <label class="fl">Password</label>
-        <input class="fi" type="password" placeholder="••••••••" value="password">
+        <input class="fi" type="password" placeholder="••••••••" value="">
       </div>
       <button class="btn-login" onclick="doLogin()">Sign In</button>
       <div class="login-apis">
@@ -1216,8 +1216,14 @@ const pageMap = {
 };
 
 function doLogin(){
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('app-view').style.display = 'block';
+  const email = document.querySelector('input[type="email"]').value;
+  const pass = document.querySelector('input[type="password"]').value;
+  if(email === 'admin@advertisingpro.xyz' && pass === 'passwordxyz'){
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('app-view').style.display = 'block';
+  } else {
+    alert('Invalid credentials');
+  }
 }
 
 function doLogout(){
