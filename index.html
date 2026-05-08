@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdvertisingPro — Platform Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===================== VARIABLES ===================== */
+:root {
+  --bg: #070910;
+  --surface: #0d1117;
+  --surface-2: #161b27;
+  --surface-3: #1c2333;
+  --border: #1e2535;
+  --border-2: #2d3748;
+  --text: #e2e8f0;
+  --text-2: #718096;
+  --text-3: #3d4a5c;
+  --g: #4285F4;
+  --g-dim: rgba(66,133,244,0.12);
+  --g-border: rgba(66,133,244,0.25);
+  --m: #0866FF;
+  --m-dim: rgba(8,102,255,0.12);
+  --m-border: rgba(8,102,255,0.25);
+  --green: #38a169;
+  --green-dim: rgba(56,161,105,0.12);
+  --red: #e53e3e;
+  --red-dim: rgba(229,62,62,0.12);
+  --yellow: #d69e2e;
+  --yellow-dim: rgba(214,158,46,0.12);
+  --purple: #805ad5;
+  --r: 8px;
+  --r-sm: 5px;
+  --sidebar: 232px;
+  --topbar: 54px;
+  --font-h: 'Syne', sans-serif;
+  --font-b: 'Instrument Sans', sans-serif;
+  --font-m: 'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+button{font-family:var(--font-b);}
+select,input{font-family:var(--font-b);}
+
+/* ===================== LOGIN ===================== */
+#login-view{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+#login-view::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 55%,rgba(66,133,244,0.07) 0%,transparent 55%),radial-gradient(ellipse at 75% 25%,rgba(8,102,255,0.06) 0%,transparent 50%),radial-gradient(ellipse at 55% 85%,rgba(128,90,213,0.04) 0%,transparent 45%);pointer-events:none;}
+#login-view::after{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:0.25;pointer-events:none;}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:400px;padding:0 20px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:40px 36px;box-shadow:0 32px 72px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.02);}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.ll-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--g),var(--m));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ll-name{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:-0.4px;}
+.ll-name em{font-style:normal;color:var(--g);}
+.login-h{font-family:var(--font-h);font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.login-s{font-size:13px;color:var(--text-2);margin-bottom:28px;}
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:11px;font-weight:500;color:var(--text-2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;}
+.fi{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .18s;}
+.fi:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(66,133,244,0.1);}
+.fi::placeholder{color:var(--text-3);}
+.btn-login{width:100%;padding:10px;background:var(--g);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;margin-top:6px;letter-spacing:0.2px;}
+.btn-login:hover{background:#3271d6;transform:translateY(-1px);box-shadow:0 4px 14px rgba(66,133,244,0.3);}
+.login-apis{margin-top:24px;padding-top:18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.api-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:100px;padding:3px 10px;}
+.api-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.login-footer{margin-top:14px;text-align:center;font-size:11px;color:var(--text-3);}
+.login-footer a{color:var(--g);}
+
+/* ===================== APP SHELL ===================== */
+#app-view{display:none;}
+.app{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+.sb-head{padding:15px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.sb-icon{width:26px;height:26px;background:linear-gradient(135deg,var(--g),var(--m));border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-name{font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:-0.3px;}
+.sb-name em{font-style:normal;color:var(--g);}
+.sb-nav{padding:10px 0;flex:1;}
+.nav-label{padding:8px 14px 3px;font-size:10px;font-weight:600;letter-spacing:0.7px;text-transform:uppercase;color:var(--text-3);}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 14px;margin:1px 5px;border-radius:var(--r-sm);cursor:pointer;color:var(--text-2);font-size:12.5px;font-weight:500;transition:all .15s;user-select:none;}
+.nav-item svg{flex-shrink:0;opacity:0.6;}
+.nav-item:hover{background:var(--surface-2);color:var(--text);}
+.nav-item:hover svg{opacity:0.9;}
+.nav-item.active-g{background:var(--g-dim);color:var(--g);}
+.nav-item.active-g svg{opacity:1;}
+.nav-item.active-m{background:var(--m-dim);color:var(--m);}
+.nav-item.active-m svg{opacity:1;}
+.nav-item.active-n{background:var(--surface-2);color:var(--text);}
+.nav-item.active-n svg{opacity:1;}
+.nav-div{margin:6px 0;border:none;border-top:1px solid var(--border);}
+.sb-foot{padding:12px 14px;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:9px;}
+.u-av{width:26px;height:26px;background:linear-gradient(135deg,var(--g),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.u-info{flex:1;min-width:0;}
+.u-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.u-role{font-size:11px;color:var(--text-2);}
+.logout-btn{background:none;border:none;color:var(--text-3);cursor:pointer;padding:3px;border-radius:3px;transition:color .15s;display:flex;}
+.logout-btn:hover{color:var(--text);}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:var(--sidebar);right:0;height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:99;}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.tb-title{font-family:var(--font-h);font-size:15px;font-weight:700;letter-spacing:-0.3px;}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:100px;border:1px solid;}
+.tb-pill.g{color:var(--g);border-color:var(--g-border);background:var(--g-dim);}
+.tb-pill.m{color:var(--m);border-color:var(--m-border);background:var(--m-dim);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);margin-top:var(--topbar);padding:22px 24px;min-height:calc(100vh - var(--topbar));}
+.page{display:none;}
+.page.active{display:block;}
+
+/* ===================== COMPONENTS ===================== */
+/* Metric grid */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px;}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;position:relative;overflow:hidden;transition:border-color .18s;}
+.mc:hover{border-color:var(--border-2);}
+.mc-label{font-size:10px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:7px;}
+.mc-value{font-family:var(--font-m);font-size:20px;font-weight:500;line-height:1;margin-bottom:5px;}
+.mc-change{font-size:11px;display:flex;align-items:center;gap:2px;}
+.mc-change.up{color:var(--green);}
+.mc-change.dn{color:var(--red);}
+.mc-change.nt{color:var(--text-2);}
+.mc-bar{position:absolute;bottom:0;left:0;right:0;height:2px;}
+.mc-bar.b{background:var(--g);}
+.mc-bar.g{background:var(--green);}
+.mc-bar.r{background:var(--red);}
+.mc-bar.y{background:var(--yellow);}
+.mc-bar.m{background:var(--m);}
+.mc-bar.p{background:var(--purple);}
+
+/* Table container */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.tbl-title{font-family:var(--font-h);font-size:13px;font-weight:600;}
+.tbl-acts{display:flex;gap:8px;align-items:center;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap th{text-align:left;padding:9px 14px;font-size:10px;font-weight:600;color:var(--text-2);letter-spacing:0.5px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap;}
+.tbl-wrap td{padding:11px 14px;font-size:12.5px;border-bottom:1px solid var(--border);white-space:nowrap;transition:background .12s;}
+.tbl-wrap tr:last-child td{border-bottom:none;}
+.tbl-wrap tr:hover td{background:rgba(255,255,255,0.018);}
+td.mono{font-family:var(--font-m);font-size:11.5px;color:var(--text-2);}
+td.positive{color:var(--green);font-family:var(--font-m);font-size:11.5px;}
+td.negative{color:var(--red);font-family:var(--font-m);font-size:11.5px;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:10.5px;font-weight:500;white-space:nowrap;}
+.badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+.badge.active{background:var(--green-dim);color:var(--green);}
+.badge.paused{background:var(--yellow-dim);color:var(--yellow);}
+.badge.removed{background:var(--red-dim);color:var(--red);}
+.badge.connected{background:var(--green-dim);color:var(--green);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid;}
+.btn-b{background:var(--g);color:#fff;border-color:var(--g);}
+.btn-b:hover{background:#3271d6;transform:translateY(-1px);}
+.btn-m{background:var(--m);color:#fff;border-color:var(--m);}
+.btn-m:hover{background:#0659d6;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text-2);border-color:var(--border);}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text);border-color:var(--border-2);}
+.btn-sm{padding:5px 9px;font-size:11.5px;}
+
+/* Page header */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
+.ph-left{}
+.ph-h{font-family:var(--font-h);font-size:20px;font-weight:700;letter-spacing:-0.4px;margin-bottom:3px;}
+.ph-s{font-size:12.5px;color:var(--text-2);}
+.ph-acts{display:flex;gap:8px;align-items:center;}
+
+/* Platform header */
+.plt-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.plt-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.plt-icon.g{background:var(--g-dim);border:1px solid var(--g-border);}
+.plt-icon.m{background:var(--m-dim);border:1px solid var(--m-border);}
+.plt-label{font-family:var(--font-h);font-size:14px;font-weight:700;letter-spacing:-0.3px;}
+.plt-sub{font-size:11px;color:var(--text-2);}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.card-title{font-family:var(--font-h);font-size:13px;font-weight:600;margin-bottom:3px;}
+.card-sub{font-size:11.5px;color:var(--text-2);margin-bottom:14px;}
+
+/* Quality score */
+.qs{display:flex;align-items:center;gap:5px;font-size:12px;}
+.qs-pip{width:7px;height:7px;border-radius:50%;}
+.qs-h{background:var(--green);}
+.qs-m{background:var(--yellow);}
+.qs-l{background:var(--red);}
+
+/* Mini bar chart */
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:40px;}
+.mb{flex:1;border-radius:2px 2px 0 0;min-width:4px;}
+
+/* Progress */
+.prog{height:3px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-top:5px;}
+.prog-f{height:100%;border-radius:2px;}
+
+/* Targeting chip */
+.chip{display:inline-flex;align-items:center;font-size:10.5px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text-2);margin:1px;}
+
+/* ===================== MODAL ===================== */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-ov.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;padding:26px;transform:translateY(18px);transition:transform .2s;box-shadow:0 24px 64px rgba(0,0,0,0.55);}
+.modal-ov.open .modal{transform:translateY(0);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-title{font-family:var(--font-h);font-size:16px;font-weight:700;}
+.modal-x{background:none;border:none;color:var(--text-2);cursor:pointer;font-size:18px;line-height:1;padding:3px;border-radius:3px;transition:color .15s;}
+.modal-x:hover{color:var(--text);}
+.m-sec{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-2);margin:18px 0 8px;}
+.m-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fs{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;color:var(--text);font-size:13px;outline:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.fs option{background:var(--surface-2);}
+.fi-modal{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;color:var(--text);font-size:13px;outline:none;}
+.fi-modal:focus{border-color:var(--g);}
+.modal-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+
+/* ===================== API STATUS ===================== */
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+.api-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;}
+.api-ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.api-plt{display:flex;align-items:center;gap:10px;}
+.api-picon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.api-picon.g{background:var(--g-dim);}
+.api-picon.m{background:var(--m-dim);}
+.api-pname{font-family:var(--font-h);font-size:14px;font-weight:700;}
+.api-pver{font-size:11px;color:var(--text-2);}
+.api-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.api-row:last-child{border-bottom:none;}
+.api-rl{color:var(--text-2);}
+.api-rv{font-family:var(--font-m);font-size:11.5px;}
+.api-rv.g{color:var(--green);}
+
+/* ===================== DASHBOARD ===================== */
+.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:4px;}
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.ac-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.ac-text{font-size:12px;color:var(--text-2);line-height:1.4;}
+.ac-text strong{color:var(--text);font-weight:500;}
+.ac-time{font-size:10.5px;color:var(--text-3);margin-left:auto;flex-shrink:0;padding-left:8px;}
+
+/* Overview chart */
+.oc-bars{display:flex;align-items:flex-end;gap:4px;height:72px;padding:0 2px;}
+.oc-bar{flex:1;border-radius:2px 2px 0 0;cursor:pointer;transition:opacity .15s;}
+.oc-bar:hover{opacity:0.7;}
+.oc-labels{display:flex;gap:4px;margin-top:5px;}
+.oc-lab{flex:1;text-align:center;font-size:9.5px;color:var(--text-3);}
+
+/* Quota bar */
+.quota-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.quota-label{font-size:12px;color:var(--text-2);}
+.quota-val{font-family:var(--font-m);font-size:11.5px;color:var(--text);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN VIEW ===================== -->
+<div id="login-view">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="ll-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9h5M10 9h5M9 3v5M9 10v5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="ll-name">Advertising<em>Pro</em></div>
+      </div>
+      <div class="login-h">Sign in to your workspace</div>
+      <div class="login-s">Manage Google &amp; Meta ad accounts from one place</div>
+      <div class="fg">
+        <label class="fl">Email address</label>
+        <input class="fi" type="email" placeholder="you@company.com" value="admin@advertisingpro.xyz">
+      </div>
+      <div class="fg">
+        <label class="fl">Password</label>
+        <input class="fi" type="password" placeholder="••••••••" value="password">
+      </div>
+      <button class="btn-login" onclick="doLogin()">Sign In</button>
+      <div class="login-apis">
+        <div class="api-pill"><span class="api-dot"></span>Google Ads API</div>
+        <div class="api-pill"><span class="api-dot"></span>Meta Marketing API</div>
+      </div>
+    </div>
+    <div class="login-footer">advertisingpro.xyz &nbsp;&middot;&nbsp; <a href="#">Privacy</a> &nbsp;&middot;&nbsp; <a href="#">Terms</a></div>
+  </div>
+</div>
+
+<!-- ===================== APP VIEW ===================== -->
+<div id="app-view">
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sb-head">
+      <div class="sb-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 7h4M8 7h4M7 2v4M7 8v4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="sb-name">Advertising<em>Pro</em></div>
+    </div>
+
+    <div class="sb-nav">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active-n" onclick="nav('dashboard',this,'n')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1.5" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="8" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="nav('api-status',this,'n')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        API Status
+      </div>
+
+      <hr class="nav-div">
+      <div class="nav-label">Google Ads</div>
+      <div class="nav-item" onclick="nav('g-campaigns',this,'g')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5l3-4 2.5 2.5 3-5.5 2 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Campaigns
+      </div>
+      <div class="nav-item" onclick="nav('g-adgroups',this,'g')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="4" width="11" height="7" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 4V3a2 2 0 0 1 4 0v1" stroke="currentColor" stroke-width="1.4"/></svg>
+        Ad Groups
+      </div>
+      <div class="nav-item" onclick="nav('g-keywords',this,'g')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7h9M2.5 4h9M2.5 10h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Keywords
+      </div>
+      <div class="nav-item" onclick="nav('g-reports',this,'g')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11.5V8m2.5 3.5V5.5M8 11.5V3m2.5 8.5V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Reports
+      </div>
+
+      <hr class="nav-div">
+      <div class="nav-label">Meta Ads</div>
+      <div class="nav-item" onclick="nav('m-campaigns',this,'m')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5l3-4 2.5 2.5 3-5.5 2 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Campaigns
+      </div>
+      <div class="nav-item" onclick="nav('m-adsets',this,'m')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="7" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="9.5" cy="7" r="2.5" stroke="currentColor" stroke-width="1.4"/></svg>
+        Ad Sets
+      </div>
+      <div class="nav-item" onclick="nav('m-ads',this,'m')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="9" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5l2.5 2L10 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ads
+      </div>
+      <div class="nav-item" onclick="nav('m-reports',this,'m')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11.5V8m2.5 3.5V5.5M8 11.5V3m2.5 8.5V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Reports
+      </div>
+    </div>
+
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="u-av">AP</div>
+        <div class="u-info">
+          <div class="u-name">Admin User</div>
+          <div class="u-role">advertisingpro.xyz</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Sign out">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 4.5L11.5 6.5L8.5 8.5M11.5 6.5H5M5 1.5H2.5C1.9 1.5 1.5 1.9 1.5 2.5v8c0 .6.4 1 1 1H5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-left">
+      <span class="tb-title" id="topbar-title">Dashboard</span>
+    </div>
+    <div class="tb-right">
+      <div class="tb-pill g"><span class="api-dot"></span>Google Ads API v19</div>
+      <div class="tb-pill m"><span class="api-dot"></span>Meta API v22.0</div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ========== DASHBOARD ========== -->
+    <div class="page active" id="page-dashboard">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="ph-h">Overview</div>
+          <div class="ph-s">Week of May 1 - 7, 2026 &nbsp;&middot;&nbsp; All platforms</div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M1 3h10M1 9h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Total Spend</div><div class="mc-value">$7,674</div><div class="mc-change up">&#9650; +8.6% vs prev week</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Impressions</div><div class="mc-value">478.9K</div><div class="mc-change up">&#9650; +5.2% vs prev week</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Clicks</div><div class="mc-value">4,312</div><div class="mc-change up">&#9650; +7.1% vs prev week</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CTR</div><div class="mc-value">2.84%</div><div class="mc-change up">&#9650; +0.13pp</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Conversions</div><div class="mc-value">192</div><div class="mc-change up">&#9650; +12.3% vs prev week</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CPC</div><div class="mc-value">$1.18</div><div class="mc-change dn">&#9660; -4.8% vs prev week</div><div class="mc-bar y"></div></div>
+        <div class="mc"><div class="mc-label">Active Campaigns</div><div class="mc-value">9</div><div class="mc-change nt">Google 5 &middot; Meta 4</div><div class="mc-bar p"></div></div>
+        <div class="mc"><div class="mc-label">Conv. Rate</div><div class="mc-value">4.45%</div><div class="mc-change up">&#9650; +0.19pp</div><div class="mc-bar g"></div></div>
+      </div>
+
+      <div class="dash-grid">
+        <div>
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-title">Weekly Spend by Platform</div>
+            <div class="card-sub">May 1 - 7, 2026</div>
+            <div class="oc-bars">
+              <div class="oc-bar" style="height:55%;background:var(--g);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:70%;background:var(--g);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:62%;background:var(--g);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:80%;background:var(--g);"></div>
+              <div class="oc-bar" style="height:75%;background:var(--g);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:90%;background:var(--g);"></div>
+              <div class="oc-bar" style="height:85%;background:var(--g);opacity:0.8;"></div>
+              <div style="width:12px;"></div>
+              <div class="oc-bar" style="height:50%;background:var(--m);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:65%;background:var(--m);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:58%;background:var(--m);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:72%;background:var(--m);"></div>
+              <div class="oc-bar" style="height:68%;background:var(--m);opacity:0.8;"></div>
+              <div class="oc-bar" style="height:82%;background:var(--m);"></div>
+              <div class="oc-bar" style="height:78%;background:var(--m);opacity:0.8;"></div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:10px;">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--g);"></div>Google Ads &nbsp;<strong style="color:var(--text);">$3,906</strong>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);">
+                <div style="width:10px;height:10px;border-radius:2px;background:var(--m);"></div>Meta Ads &nbsp;<strong style="color:var(--text);">$3,768</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="tbl-wrap">
+            <div class="tbl-head">
+              <div class="tbl-title">Campaign Summary</div>
+            </div>
+            <table>
+              <thead><tr><th>Campaign</th><th>Platform</th><th>Status</th><th>Spend</th><th>Conv.</th></tr></thead>
+              <tbody>
+                <tr><td>Finance Offer AU - MOFU</td><td><span style="color:var(--g);font-size:11px;font-weight:600;">Google</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$558</td><td class="mono">18</td></tr>
+                <tr><td>Platform Eval - MY</td><td><span style="color:var(--g);font-size:11px;font-weight:600;">Google</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$874</td><td class="mono">41</td></tr>
+                <tr><td>PMax - Finance</td><td><span style="color:var(--g);font-size:11px;font-weight:600;">Google</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$2,604</td><td class="mono">62</td></tr>
+                <tr><td>Lead Gen - Finance AU</td><td><span style="color:var(--m);font-size:11px;font-weight:600;">Meta</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$1,001</td><td class="mono">89</td></tr>
+                <tr><td>Retargeting - Website</td><td><span style="color:var(--m);font-size:11px;font-weight:600;">Meta</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$840</td><td class="mono">42</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-title">Recent Activity</div>
+            <div class="card-sub">System &amp; API events</div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--green);"></div><div class="ac-text"><strong>Bid adjustment applied</strong> — PMax Finance, +15% mobile</div><div class="ac-time">09:14</div></div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--g);"></div><div class="ac-text"><strong>Campaign synced</strong> — Google Ads API pull complete</div><div class="ac-time">08:43</div></div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--m);"></div><div class="ac-text"><strong>Meta API synced</strong> — All ad sets refreshed</div><div class="ac-time">08:41</div></div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--yellow);"></div><div class="ac-text"><strong>Budget pacing alert</strong> — Lead Gen AU at 92% daily budget</div><div class="ac-time">07:55</div></div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--green);"></div><div class="ac-text"><strong>New conversion</strong> — Platform Eval MY, search network</div><div class="ac-time">07:32</div></div>
+            <div class="activity-item"><div class="ac-dot" style="background:var(--green);"></div><div class="ac-text"><strong>Ad approved</strong> — Meta "Smart Trading" video creative</div><div class="ac-time">Yesterday</div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">API Quota Usage</div>
+            <div class="card-sub" style="margin-bottom:12px;">Current billing period</div>
+            <div class="quota-row"><span class="quota-label">Google Ads API</span><span class="quota-val">12,400 / 15,000</span></div>
+            <div class="prog" style="margin-bottom:12px;"><div class="prog-f" style="width:82%;background:var(--g);"></div></div>
+            <div class="quota-row"><span class="quota-label">Meta Marketing API</span><span class="quota-val">8,820 / 200,000</span></div>
+            <div class="prog"><div class="prog-f" style="width:4.4%;background:var(--m);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== GOOGLE CAMPAIGNS ========== -->
+    <div class="page" id="page-g-campaigns">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon g">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3.5C6 3.5 3.5 6 3.5 9S6 14.5 9 14.5c2.5 0 4.6-1.5 5.4-3.8H9V9h8c.1.6.2 1.3.2 2 0 4.4-3.6 8-8 8-4.4 0-8-3.6-8-8s3.6-8 8-8c2.1 0 4 .8 5.5 2.1L13 6.5C11.9 5.4 10.5 4.8 9 4.8" fill="var(--g)"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Google Ads — Campaigns</div>
+              <div class="plt-sub">Customer ID: 123-456-7890 &middot; MCC linked</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">Export CSV</button>
+          <button class="btn btn-b btn-sm" onclick="openModal('modal-g-campaign')">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1.5v8M1.5 5.5h8" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+            New Campaign
+          </button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Impressions</div><div class="mc-value">298K</div><div class="mc-change up">&#9650; +6.1%</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Clicks</div><div class="mc-value">3,310</div><div class="mc-change up">&#9650; +9.5%</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">CTR</div><div class="mc-value">2.84%</div><div class="mc-change up">&#9650; +0.13pp</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CPC</div><div class="mc-value">$1.18</div><div class="mc-change dn">&#9660; -4.8%</div><div class="mc-bar y"></div></div>
+        <div class="mc"><div class="mc-label">Conversions</div><div class="mc-value">141</div><div class="mc-change up">&#9650; +11.0%</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Cost</div><div class="mc-value">$3,906</div><div class="mc-change up">&#9650; +4.2%</div><div class="mc-bar r"></div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">All Campaigns</div>
+          <div class="tbl-acts">
+            <span style="font-size:11px;color:var(--text-2);">5 campaigns</span>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Campaign Name</th><th>Type</th><th>Status</th><th>Daily Budget</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Avg. CPC</th><th>Conv.</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">Finance Offer AU - MOFU</td><td><span class="chip">Search</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$85/day</td><td class="mono">12,450</td><td class="mono">348</td><td class="mono">2.79%</td><td class="mono">$1.24</td><td class="mono">18</td><td class="mono">$432</td></tr>
+            <tr><td style="font-weight:500;">Platform Eval - MY</td><td><span class="chip">Search</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$120/day</td><td class="mono">28,100</td><td class="mono">892</td><td class="mono">3.17%</td><td class="mono">$0.98</td><td class="mono">41</td><td class="mono">$874</td></tr>
+            <tr><td style="font-weight:500;">Brand Protection</td><td><span class="chip">Search</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$30/day</td><td class="mono">5,600</td><td class="mono">210</td><td class="mono">3.75%</td><td class="mono">$0.42</td><td class="mono">12</td><td class="mono">$88</td></tr>
+            <tr><td style="font-weight:500;">Display Retargeting</td><td><span class="chip">Display</span></td><td><span class="badge paused"><span class="badge-dot"></span>Paused</span></td><td class="mono">$50/day</td><td class="mono">184,000</td><td class="mono">620</td><td class="mono">0.34%</td><td class="mono">$0.81</td><td class="mono">8</td><td class="mono">$502</td></tr>
+            <tr><td style="font-weight:500;">PMax - Finance</td><td><span class="chip">Perf. Max</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$200/day</td><td class="mono">67,300</td><td class="mono">1,240</td><td class="mono">1.84%</td><td class="mono">$2.10</td><td class="mono">62</td><td class="mono">$2,604</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== GOOGLE AD GROUPS ========== -->
+    <div class="page" id="page-g-adgroups">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon g">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="6" width="13" height="10" rx="1.5" stroke="var(--g)" stroke-width="1.5"/><path d="M6.5 6V5a2.5 2.5 0 0 1 5 0v1" stroke="var(--g)" stroke-width="1.5"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Google Ads — Ad Groups</div>
+              <div class="plt-sub">Campaign: Finance Offer AU - MOFU</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">All Campaigns</button>
+          <button class="btn btn-b btn-sm" onclick="openModal('modal-g-campaign')">+ New Ad Group</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Ad Groups</div><div class="mc-value">5</div><div class="mc-change nt">3 active, 1 paused</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Keywords</div><div class="mc-value">63</div><div class="mc-change nt">Across all groups</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Avg. QS</div><div class="mc-value">7.4</div><div class="mc-change up">&#9650; +0.3 vs prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Top Ad Group CTR</div><div class="mc-value">3.82%</div><div class="mc-change nt">Platform Review</div><div class="mc-bar b"></div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Ad Groups — Finance Offer AU - MOFU</div></div>
+        <table>
+          <thead><tr><th>Ad Group</th><th>Status</th><th>Keywords</th><th>Avg. CPC</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Conv.</th><th>Quality Score</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">MOFU - Platform Comparison</td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">12</td><td class="mono">$1.08</td><td class="mono">4,200</td><td class="mono">124</td><td class="mono">2.95%</td><td class="mono">7</td><td><div class="qs"><div class="qs-pip qs-h"></div>8/10</div></td></tr>
+            <tr><td style="font-weight:500;">MOFU - Best Platform</td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">8</td><td class="mono">$1.42</td><td class="mono">2,800</td><td class="mono">98</td><td class="mono">3.50%</td><td class="mono">6</td><td><div class="qs"><div class="qs-pip qs-h"></div>7/10</div></td></tr>
+            <tr><td style="font-weight:500;">Trading Platform Review</td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">15</td><td class="mono">$0.98</td><td class="mono">3,100</td><td class="mono">118</td><td class="mono">3.82%</td><td class="mono">4</td><td><div class="qs"><div class="qs-pip qs-h"></div>9/10</div></td></tr>
+            <tr><td style="font-weight:500;">Competitor Terms</td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">6</td><td class="mono">$1.84</td><td class="mono">1,550</td><td class="mono">38</td><td class="mono">2.45%</td><td class="mono">1</td><td><div class="qs"><div class="qs-pip qs-m"></div>6/10</div></td></tr>
+            <tr><td style="font-weight:500;">Long-tail Queries</td><td><span class="badge paused"><span class="badge-dot"></span>Paused</span></td><td class="mono">22</td><td class="mono">$0.67</td><td class="mono">800</td><td class="mono">28</td><td class="mono">3.50%</td><td class="mono">0</td><td><div class="qs"><div class="qs-pip qs-m"></div>5/10</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== GOOGLE KEYWORDS ========== -->
+    <div class="page" id="page-g-keywords">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon g">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M3 5.5h12M3 12.5h7" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Google Ads — Keywords</div>
+              <div class="plt-sub">Ad Group: MOFU - Platform Comparison</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">+ Add Keywords</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Keywords</div><div class="tbl-acts"><span style="font-size:11px;color:var(--text-2);">12 keywords</span></div></div>
+        <table>
+          <thead><tr><th>Keyword</th><th>Match Type</th><th>Status</th><th>Quality Score</th><th>Impr.</th><th>Clicks</th><th>CTR</th><th>Avg. CPC</th><th>Conv.</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">best trading platform</td><td><span class="chip">Broad</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-h"></div>8/10</div></td><td class="mono">4,200</td><td class="mono">124</td><td class="mono">2.95%</td><td class="mono">$1.12</td><td class="mono">6</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">trading platform comparison</td><td><span class="chip">Phrase</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-h"></div>7/10</div></td><td class="mono">2,800</td><td class="mono">98</td><td class="mono">3.50%</td><td class="mono">$0.98</td><td class="mono">4</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">top forex platform</td><td><span class="chip">[Exact]</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-h"></div>9/10</div></td><td class="mono">1,900</td><td class="mono">72</td><td class="mono">3.79%</td><td class="mono">$1.34</td><td class="mono">3</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">online trading software</td><td><span class="chip">Broad</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-m"></div>6/10</div></td><td class="mono">3,100</td><td class="mono">88</td><td class="mono">2.84%</td><td class="mono">$0.87</td><td class="mono">2</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">cfd trading platform</td><td><span class="chip">Phrase</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-h"></div>8/10</div></td><td class="mono">2,200</td><td class="mono">84</td><td class="mono">3.82%</td><td class="mono">$1.52</td><td class="mono">5</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">best forex broker</td><td><span class="chip">[Exact]</span></td><td><span class="badge paused"><span class="badge-dot"></span>Paused</span></td><td><div class="qs"><div class="qs-pip qs-l"></div>4/10</div></td><td class="mono">800</td><td class="mono">24</td><td class="mono">3.00%</td><td class="mono">$2.18</td><td class="mono">0</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">mt4 platform review</td><td><span class="chip">Phrase</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-h"></div>7/10</div></td><td class="mono">1,400</td><td class="mono">52</td><td class="mono">3.71%</td><td class="mono">$1.08</td><td class="mono">2</td></tr>
+            <tr><td style="font-family:var(--font-m);font-size:12px;">crypto trading platform</td><td><span class="chip">Broad</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td><div class="qs"><div class="qs-pip qs-m"></div>5/10</div></td><td class="mono">1,850</td><td class="mono">48</td><td class="mono">2.59%</td><td class="mono">$1.64</td><td class="mono">1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== GOOGLE REPORTS ========== -->
+    <div class="page" id="page-g-reports">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon g">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 14.5V10M6.5 14.5V7M9.5 14.5V3.5M12.5 14.5V8M15.5 14.5V11" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Google Ads — Weekly Report</div>
+              <div class="plt-sub">May 1 - 7, 2026 &middot; All campaigns</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">Export PDF</button>
+          <button class="btn btn-b btn-sm">Email Report</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Impressions</div><div class="mc-value">298.1K</div><div class="mc-change up">&#9650; vs 281.0K prev</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Clicks</div><div class="mc-value">3,310</div><div class="mc-change up">&#9650; vs 3,024 prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">CTR</div><div class="mc-value">2.84%</div><div class="mc-change up">&#9650; vs 2.71% prev</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CPC</div><div class="mc-value">$1.18</div><div class="mc-change dn">&#9660; vs $1.24 prev</div><div class="mc-bar y"></div></div>
+        <div class="mc"><div class="mc-label">Conversions</div><div class="mc-value">141</div><div class="mc-change up">&#9650; vs 127 prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Conv. Rate</div><div class="mc-value">4.26%</div><div class="mc-change up">&#9650; vs 4.20% prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Cost</div><div class="mc-value">$3,906</div><div class="mc-change up">&#9650; vs $3,750 prev</div><div class="mc-bar r"></div></div>
+        <div class="mc"><div class="mc-label">ROAS</div><div class="mc-value">5.8x</div><div class="mc-change up">&#9650; vs 5.3x prev</div><div class="mc-bar g"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="tbl-wrap">
+          <div class="tbl-head"><div class="tbl-title">Performance by Campaign</div></div>
+          <table>
+            <thead><tr><th>Campaign</th><th>Clicks</th><th>Conv.</th><th>Cost</th><th>ROAS</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:500;">PMax - Finance</td><td class="mono">1,240</td><td class="mono">62</td><td class="mono">$2,604</td><td class="positive">6.2x</td></tr>
+              <tr><td style="font-weight:500;">Platform Eval - MY</td><td class="mono">892</td><td class="mono">41</td><td class="mono">$874</td><td class="positive">7.1x</td></tr>
+              <tr><td style="font-weight:500;">Finance Offer AU</td><td class="mono">348</td><td class="mono">18</td><td class="mono">$432</td><td class="positive">5.4x</td></tr>
+              <tr><td style="font-weight:500;">Brand Protection</td><td class="mono">210</td><td class="mono">12</td><td class="mono">$88</td><td class="positive">10.4x</td></tr>
+              <tr><td style="font-weight:500;">Display Retargeting</td><td class="mono">620</td><td class="mono">8</td><td class="mono">$502</td><td class="negative">2.1x</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Daily Clicks — This Week</div>
+          <div class="card-sub">All campaigns combined</div>
+          <div class="mini-bars">
+            <div class="mb" style="height:55%;background:var(--g);opacity:0.6;"></div>
+            <div class="mb" style="height:70%;background:var(--g);opacity:0.7;"></div>
+            <div class="mb" style="height:62%;background:var(--g);opacity:0.75;"></div>
+            <div class="mb" style="height:85%;background:var(--g);opacity:0.9;"></div>
+            <div class="mb" style="height:78%;background:var(--g);opacity:0.85;"></div>
+            <div class="mb" style="height:95%;background:var(--g);"></div>
+            <div class="mb" style="height:88%;background:var(--g);opacity:0.9;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span style="font-size:9.5px;color:var(--text-3);">Mon</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Tue</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Wed</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Thu</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Fri</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Sat</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Sun</span>
+          </div>
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;"><span style="color:var(--text-2);">Week total</span><span style="font-family:var(--font-m);">3,310 clicks</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text-2);">Prev week</span><span style="font-family:var(--font-m);color:var(--text-2);">3,024 clicks</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== META CAMPAIGNS ========== -->
+    <div class="page" id="page-m-campaigns">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon m">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.5C5.4 2.5 2.5 5.4 2.5 9S5.4 15.5 9 15.5 15.5 12.6 15.5 9 12.6 2.5 9 2.5zM9 12.5c-1.4 0-2.7-.6-3.6-1.6.4-.3.9-.5 1.4-.5.8 0 1.6.3 2.2.8.6-.5 1.4-.8 2.2-.8.5 0 1 .2 1.4.5-.9 1-2.2 1.6-3.6 1.6z" fill="var(--m)"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Meta Ads — Campaigns</div>
+              <div class="plt-sub">Ad Account: act_12••••••••••• &middot; API v22.0</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">Export CSV</button>
+          <button class="btn btn-m btn-sm" onclick="openModal('modal-m-campaign')">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1.5v8M1.5 5.5h8" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+            New Campaign
+          </button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Reach</div><div class="mc-value">72.4K</div><div class="mc-change up">&#9650; +4.2%</div><div class="mc-bar m"></div></div>
+        <div class="mc"><div class="mc-label">Impressions</div><div class="mc-value">180.7K</div><div class="mc-change up">&#9650; +3.8%</div><div class="mc-bar m"></div></div>
+        <div class="mc"><div class="mc-label">CTR</div><div class="mc-value">2.14%</div><div class="mc-change up">&#9650; +0.22pp</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CPC</div><div class="mc-value">$0.64</div><div class="mc-change dn">&#9660; -7.2%</div><div class="mc-bar y"></div></div>
+        <div class="mc"><div class="mc-label">Results</div><div class="mc-value">359</div><div class="mc-change up">&#9650; +14.3%</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Spend</div><div class="mc-value">$3,768</div><div class="mc-change up">&#9650; +6.1%</div><div class="mc-bar r"></div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">All Campaigns</div><div class="tbl-acts"><span style="font-size:11px;color:var(--text-2);">4 campaigns</span></div></div>
+        <table>
+          <thead><tr><th>Campaign Name</th><th>Objective</th><th>Status</th><th>Daily Budget</th><th>Reach</th><th>Impressions</th><th>CTR</th><th>CPC</th><th>Results</th><th>Cost/Result</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">Lead Gen - Finance AU</td><td><span class="chip">Lead Gen</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$150/day</td><td class="mono">45,200</td><td class="mono">89,400</td><td class="mono">1.42%</td><td class="mono">$0.67</td><td class="mono">89</td><td class="mono">$11.24</td></tr>
+            <tr><td style="font-weight:500;">Traffic - Blog Content</td><td><span class="chip">Traffic</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$80/day</td><td class="mono">18,900</td><td class="mono">31,200</td><td class="mono">2.18%</td><td class="mono">$0.41</td><td class="mono">228</td><td class="mono">$2.81</td></tr>
+            <tr><td style="font-weight:500;">Retargeting - Website</td><td><span class="chip">Conversions</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">$120/day</td><td class="mono">8,400</td><td class="mono">22,100</td><td class="mono">3.87%</td><td class="mono">$1.12</td><td class="mono">42</td><td class="mono">$17.90</td></tr>
+            <tr><td style="font-weight:500;">Awareness - Brand</td><td><span class="chip">Awareness</span></td><td><span class="badge paused"><span class="badge-dot"></span>Paused</span></td><td class="mono">$60/day</td><td class="mono">62,100</td><td class="mono">120,400</td><td class="mono">0.89%</td><td class="mono">$0.32</td><td class="mono">—</td><td class="mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== META AD SETS ========== -->
+    <div class="page" id="page-m-adsets">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon m">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="6" cy="9" r="3.5" stroke="var(--m)" stroke-width="1.5"/><circle cx="12" cy="9" r="3.5" stroke="var(--m)" stroke-width="1.5"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Meta Ads — Ad Sets</div>
+              <div class="plt-sub">All campaigns &middot; Targeting overview</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-m btn-sm" onclick="openModal('modal-m-campaign')">+ New Ad Set</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Ad Sets</div><div class="tbl-acts"><span style="font-size:11px;color:var(--text-2);">5 ad sets</span></div></div>
+        <table>
+          <thead><tr><th>Ad Set</th><th>Targeting</th><th>Age</th><th>Status</th><th>Reach</th><th>Impr.</th><th>CTR</th><th>Results</th><th>Budget</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">AU - Finance Interests</td>
+              <td><span class="chip">Finance</span><span class="chip">Investing</span><span class="chip">Trading</span></td>
+              <td class="mono">30-55</td>
+              <td><span class="badge active"><span class="badge-dot"></span>Active</span></td>
+              <td class="mono">28,400</td><td class="mono">52,100</td><td class="mono">1.58%</td><td class="mono">54</td><td class="mono">$80/day</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">AU - Lookalike 1%</td>
+              <td><span class="chip">LLA - Leads</span><span class="chip">AU</span></td>
+              <td class="mono">25-54</td>
+              <td><span class="badge active"><span class="badge-dot"></span>Active</span></td>
+              <td class="mono">16,800</td><td class="mono">37,300</td><td class="mono">1.21%</td><td class="mono">35</td><td class="mono">$70/day</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">MY - Finance Interests</td>
+              <td><span class="chip">Finance</span><span class="chip">Trading</span><span class="chip">MY</span></td>
+              <td class="mono">28-50</td>
+              <td><span class="badge active"><span class="badge-dot"></span>Active</span></td>
+              <td class="mono">9,200</td><td class="mono">18,400</td><td class="mono">2.14%</td><td class="mono">22</td><td class="mono">$40/day</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Website Visitors - 30d</td>
+              <td><span class="chip">Retargeting</span><span class="chip">Custom Audience</span></td>
+              <td class="mono">21-65</td>
+              <td><span class="badge active"><span class="badge-dot"></span>Active</span></td>
+              <td class="mono">8,400</td><td class="mono">22,100</td><td class="mono">3.87%</td><td class="mono">42</td><td class="mono">$120/day</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">Blog Readers - Engagement</td>
+              <td><span class="chip">Engagement CA</span><span class="chip">Broad</span></td>
+              <td class="mono">25-54</td>
+              <td><span class="badge active"><span class="badge-dot"></span>Active</span></td>
+              <td class="mono">18,900</td><td class="mono">31,200</td><td class="mono">2.18%</td><td class="mono">228</td><td class="mono">$80/day</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== META ADS ========== -->
+    <div class="page" id="page-m-ads">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon m">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5" stroke="var(--m)" stroke-width="1.5"/><path d="M6.5 8.5l3 2.5L13 7" stroke="var(--m)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Meta Ads — Ads</div>
+              <div class="plt-sub">Creative performance overview</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-m btn-sm">+ Upload Creative</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><div class="tbl-title">Ad Creatives</div><div class="tbl-acts"><span style="font-size:11px;color:var(--text-2);">6 ads</span></div></div>
+        <table>
+          <thead><tr><th>Ad Name</th><th>Format</th><th>Status</th><th>Reach</th><th>Impr.</th><th>CTR</th><th>CPC</th><th>Results</th><th>Freq.</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">"Smart Trading Starts Here"</td><td><span class="chip">Video</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">22,100</td><td class="mono">44,800</td><td class="mono">1.62%</td><td class="mono">$0.58</td><td class="mono">44</td><td class="mono">2.03</td></tr>
+            <tr><td style="font-weight:500;">Platform Comparison Carousel</td><td><span class="chip">Carousel</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">14,200</td><td class="mono">28,100</td><td class="mono">1.28%</td><td class="mono">$0.72</td><td class="mono">28</td><td class="mono">1.98</td></tr>
+            <tr><td style="font-weight:500;">"Why Traders Choose Us"</td><td><span class="chip">Image</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">8,900</td><td class="mono">16,500</td><td class="mono">1.18%</td><td class="mono">$0.82</td><td class="mono">17</td><td class="mono">1.85</td></tr>
+            <tr><td style="font-weight:500;">Blog - "Top 5 Platforms"</td><td><span class="chip">Image</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">12,400</td><td class="mono">20,300</td><td class="mono">2.24%</td><td class="mono">$0.38</td><td class="mono">142</td><td class="mono">1.64</td></tr>
+            <tr><td style="font-weight:500;">Blog - "CFD Trading Guide"</td><td><span class="chip">Image</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">8,100</td><td class="mono">12,800</td><td class="mono">2.08%</td><td class="mono">$0.44</td><td class="mono">86</td><td class="mono">1.58</td></tr>
+            <tr><td style="font-weight:500;">Homepage Retarget</td><td><span class="chip">Video</span></td><td><span class="badge active"><span class="badge-dot"></span>Active</span></td><td class="mono">6,700</td><td class="mono">15,200</td><td class="mono">4.12%</td><td class="mono">$0.98</td><td class="mono">28</td><td class="mono">2.27</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== META REPORTS ========== -->
+    <div class="page" id="page-m-reports">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="plt-head">
+            <div class="plt-icon m">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 14.5V10M6.5 14.5V7M9.5 14.5V3.5M12.5 14.5V8M15.5 14.5V11" stroke="var(--m)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="plt-label">Meta Ads — Weekly Report</div>
+              <div class="plt-sub">May 1 - 7, 2026 &middot; All campaigns</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">Export PDF</button>
+          <button class="btn btn-m btn-sm">Email Report</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="mc"><div class="mc-label">Reach</div><div class="mc-value">72.4K</div><div class="mc-change up">&#9650; vs 69.5K prev</div><div class="mc-bar m"></div></div>
+        <div class="mc"><div class="mc-label">Impressions</div><div class="mc-value">180.7K</div><div class="mc-change up">&#9650; vs 174.0K prev</div><div class="mc-bar m"></div></div>
+        <div class="mc"><div class="mc-label">CTR</div><div class="mc-value">2.14%</div><div class="mc-change up">&#9650; vs 1.92% prev</div><div class="mc-bar b"></div></div>
+        <div class="mc"><div class="mc-label">Avg. CPC</div><div class="mc-value">$0.64</div><div class="mc-change dn">&#9660; vs $0.69 prev</div><div class="mc-bar y"></div></div>
+        <div class="mc"><div class="mc-label">Results</div><div class="mc-value">359</div><div class="mc-change up">&#9650; vs 314 prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Cost/Result</div><div class="mc-value">$10.50</div><div class="mc-change dn">&#9660; vs $11.20 prev</div><div class="mc-bar g"></div></div>
+        <div class="mc"><div class="mc-label">Spend</div><div class="mc-value">$3,768</div><div class="mc-change up">&#9650; vs $3,553 prev</div><div class="mc-bar r"></div></div>
+        <div class="mc"><div class="mc-label">Frequency</div><div class="mc-value">2.50</div><div class="mc-change nt">Target &lt;3.0</div><div class="mc-bar p"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="tbl-wrap">
+          <div class="tbl-head"><div class="tbl-title">Results by Campaign</div></div>
+          <table>
+            <thead><tr><th>Campaign</th><th>Results</th><th>Cost/Result</th><th>Spend</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:500;">Traffic - Blog Content</td><td class="mono">228</td><td class="mono">$2.81</td><td class="mono">$641</td></tr>
+              <tr><td style="font-weight:500;">Lead Gen - Finance AU</td><td class="mono">89</td><td class="mono">$11.24</td><td class="mono">$1,001</td></tr>
+              <tr><td style="font-weight:500;">Retargeting - Website</td><td class="mono">42</td><td class="mono">$17.90</td><td class="mono">$752</td></tr>
+              <tr><td style="font-weight:500;">Awareness - Brand</td><td class="mono">—</td><td class="mono">—</td><td class="mono">$420</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Daily Reach — This Week</div>
+          <div class="card-sub">All campaigns combined</div>
+          <div class="mini-bars">
+            <div class="mb" style="height:48%;background:var(--m);opacity:0.55;"></div>
+            <div class="mb" style="height:62%;background:var(--m);opacity:0.65;"></div>
+            <div class="mb" style="height:70%;background:var(--m);opacity:0.75;"></div>
+            <div class="mb" style="height:88%;background:var(--m);opacity:0.9;"></div>
+            <div class="mb" style="height:82%;background:var(--m);opacity:0.85;"></div>
+            <div class="mb" style="height:100%;background:var(--m);"></div>
+            <div class="mb" style="height:92%;background:var(--m);opacity:0.95;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span style="font-size:9.5px;color:var(--text-3);">Mon</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Tue</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Wed</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Thu</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Fri</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Sat</span>
+            <span style="font-size:9.5px;color:var(--text-3);">Sun</span>
+          </div>
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;"><span style="color:var(--text-2);">Week total</span><span style="font-family:var(--font-m);">72,400 reach</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text-2);">Prev week</span><span style="font-family:var(--font-m);color:var(--text-2);">69,500 reach</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== API STATUS ========== -->
+    <div class="page" id="page-api-status">
+      <div class="ph">
+        <div class="ph-left">
+          <div class="ph-h">API Connection Status</div>
+          <div class="ph-s">Platform API credentials &amp; sync details</div>
+        </div>
+        <div class="ph-acts">
+          <button class="btn btn-ghost btn-sm">Refresh Status</button>
+        </div>
+      </div>
+
+      <div class="api-grid">
+        <!-- Google Card -->
+        <div class="api-card">
+          <div class="api-ch">
+            <div class="api-plt">
+              <div class="api-picon g">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4C6.7 4 4 6.7 4 10s2.7 6 6 6c2.5 0 4.6-1.5 5.5-3.6H10V10h8.7c.1.6.1 1.3.1 2C18.8 15.7 14.8 19 10 19 5 19 1 15 1 10S5 1 10 1c2.4 0 4.6.9 6.2 2.4L13.7 6C12.5 4.8 11.3 4 10 4z" fill="var(--g)"/></svg>
+              </div>
+              <div>
+                <div class="api-pname">Google Ads API</div>
+                <div class="api-pver">Version: v19</div>
+              </div>
+            </div>
+            <span class="badge connected"><span class="badge-dot"></span>Connected</span>
+          </div>
+          <div class="api-row"><span class="api-rl">OAuth 2.0 Status</span><span class="api-rv g">Active &amp; Valid</span></div>
+          <div class="api-row"><span class="api-rl">Developer Token</span><span class="api-rv">ADT-••••••-••••••</span></div>
+          <div class="api-row"><span class="api-rl">Customer ID</span><span class="api-rv">123-456-7890</span></div>
+          <div class="api-row"><span class="api-rl">Manager (MCC)</span><span class="api-rv">MCC-••••••••</span></div>
+          <div class="api-row"><span class="api-rl">Linked Accounts</span><span class="api-rv">3 accounts</span></div>
+          <div class="api-row"><span class="api-rl">Daily Quota</span><span class="api-rv">12,400 / 15,000 req</span></div>
+          <div class="api-row"><span class="api-rl">Token Expiry</span><span class="api-rv">Auto-refresh (valid)</span></div>
+          <div class="api-row"><span class="api-rl">Last Synced</span><span class="api-rv g">Today 08:43 AM</span></div>
+        </div>
+
+        <!-- Meta Card -->
+        <div class="api-card">
+          <div class="api-ch">
+            <div class="api-plt">
+              <div class="api-picon m">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2.5C5.9 2.5 2.5 5.9 2.5 10S5.9 17.5 10 17.5 17.5 14.1 17.5 10 14.1 2.5 10 2.5zm0 11c-1.5 0-2.9-.6-3.9-1.6.5-.4 1.1-.6 1.8-.6.9 0 1.8.4 2.4.9.6-.5 1.5-.9 2.4-.9.6 0 1.2.2 1.7.6-1 1-2.4 1.6-3.9 1.6z" fill="var(--m)"/></svg>
+              </div>
+              <div>
+                <div class="api-pname">Meta Marketing API</div>
+                <div class="api-pver">Version: v22.0</div>
+              </div>
+            </div>
+            <span class="badge connected"><span class="badge-dot"></span>Connected</span>
+          </div>
+          <div class="api-row"><span class="api-rl">App Status</span><span class="api-rv g">Live — Approved</span></div>
+          <div class="api-row"><span class="api-rl">App ID</span><span class="api-rv">10••••••••••••</span></div>
+          <div class="api-row"><span class="api-rl">Access Token</span><span class="api-rv">EAA••••••••••••</span></div>
+          <div class="api-row"><span class="api-rl">Ad Account</span><span class="api-rv">act_12••••••••••</span></div>
+          <div class="api-row"><span class="api-rl">Pixel ID</span><span class="api-rv">12••••••••••</span></div>
+          <div class="api-row"><span class="api-rl">Conversions API</span><span class="api-rv g">Active</span></div>
+          <div class="api-row"><span class="api-rl">Token Expiry</span><span class="api-rv">Long-lived (60 days)</span></div>
+          <div class="api-row"><span class="api-rl">Last Synced</span><span class="api-rv g">Today 08:41 AM</span></div>
+        </div>
+      </div>
+
+      <!-- Rate limits info -->
+      <div class="card">
+        <div class="card-title">API Rate Limits &amp; Permissions</div>
+        <div class="card-sub">Granted scopes and usage thresholds</div>
+        <div class="grid-2" style="margin-top:4px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-2);margin-bottom:10px;">Google Ads Scopes</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>adwords</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>adwords.readonly</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Campaign management</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Reporting access</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Billing read</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-2);margin-bottom:10px;">Meta API Permissions</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ads_management</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ads_read</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>business_management</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>leads_retrieval</div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>pixel_manage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+</div><!-- /app -->
+</div><!-- /app-view -->
+
+<!-- ===================== MODALS ===================== -->
+<!-- Google Campaign Modal -->
+<div class="modal-ov" id="modal-g-campaign" onclick="closeModal(event,'modal-g-campaign')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Create Google Campaign</div>
+      <button class="modal-x" onclick="closeModal(null,'modal-g-campaign')">&times;</button>
+    </div>
+
+    <div class="m-sec">Campaign Details</div>
+    <div class="fg" style="margin-bottom:12px;">
+      <label class="fl">Campaign Name</label>
+      <input class="fi-modal fi" type="text" placeholder="e.g. Finance Offer AU - Search">
+    </div>
+
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Campaign Type</label>
+        <select class="fs">
+          <option>Search</option>
+          <option>Display</option>
+          <option>Shopping</option>
+          <option>Video</option>
+          <option>Performance Max</option>
+          <option>Demand Gen</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Campaign Goal</label>
+        <select class="fs">
+          <option>Leads</option>
+          <option>Website Traffic</option>
+          <option>Brand Awareness</option>
+          <option>App Promotion</option>
+          <option>Sales</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="m-sec">Bidding &amp; Budget</div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Bidding Strategy</label>
+        <select class="fs">
+          <option>Target CPA</option>
+          <option>Target ROAS</option>
+          <option>Maximize Conversions</option>
+          <option>Manual CPC</option>
+          <option>Maximize Clicks</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Daily Budget ($)</label>
+        <input class="fi-modal fi" type="number" placeholder="100">
+      </div>
+    </div>
+
+    <div class="m-sec">Targeting</div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Geographic Targeting</label>
+        <select class="fs">
+          <option>Australia</option>
+          <option>Malaysia</option>
+          <option>Singapore</option>
+          <option>United Kingdom</option>
+          <option>Global</option>
+          <option>Custom</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Languages</label>
+        <select class="fs">
+          <option>English</option>
+          <option>English, Bahasa Melayu</option>
+          <option>English, Mandarin</option>
+          <option>All Languages</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="m-sec">Schedule</div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:0;">
+        <label class="fl">Start Date</label>
+        <input class="fi-modal fi" type="date">
+      </div>
+      <div class="fg" style="margin-bottom:0;">
+        <label class="fl">End Date (optional)</label>
+        <input class="fi-modal fi" type="date">
+      </div>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal(null,'modal-g-campaign')">Cancel</button>
+      <button class="btn btn-b">Create Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- Meta Campaign Modal -->
+<div class="modal-ov" id="modal-m-campaign" onclick="closeModal(event,'modal-m-campaign')">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Create Meta Campaign</div>
+      <button class="modal-x" onclick="closeModal(null,'modal-m-campaign')">&times;</button>
+    </div>
+
+    <div class="m-sec">Campaign Details</div>
+    <div class="fg" style="margin-bottom:12px;">
+      <label class="fl">Campaign Name</label>
+      <input class="fi-modal fi" type="text" placeholder="e.g. Lead Gen - Finance AU - May26">
+    </div>
+
+    <div class="fg" style="margin-bottom:12px;">
+      <label class="fl">Campaign Objective</label>
+      <select class="fs">
+        <option>Awareness</option>
+        <option>Traffic</option>
+        <option>Engagement</option>
+        <option>Leads</option>
+        <option>App Promotion</option>
+        <option>Sales</option>
+      </select>
+    </div>
+
+    <div class="m-sec">Budget &amp; Schedule</div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Budget Type</label>
+        <select class="fs">
+          <option>Daily Budget</option>
+          <option>Lifetime Budget</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Amount ($)</label>
+        <input class="fi-modal fi" type="number" placeholder="150">
+      </div>
+    </div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Start Date</label>
+        <input class="fi-modal fi" type="date">
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">End Date (optional)</label>
+        <input class="fi-modal fi" type="date">
+      </div>
+    </div>
+
+    <div class="m-sec">Settings</div>
+    <div class="m-g2">
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Buying Type</label>
+        <select class="fs">
+          <option>Auction</option>
+          <option>Reach &amp; Frequency</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl">Special Ad Categories</label>
+        <select class="fs">
+          <option>None</option>
+          <option>Credit</option>
+          <option>Housing</option>
+          <option>Employment</option>
+          <option>Social Issues</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-bottom:0;">
+      <label class="fl">Ad Account</label>
+      <select class="fs">
+        <option>act_12•••••••••• (Primary)</option>
+        <option>act_89•••••••••• (Secondary)</option>
+      </select>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal(null,'modal-m-campaign')">Cancel</button>
+      <button class="btn btn-m">Create Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+const pageMap = {
+  'dashboard': {title:'Dashboard', cls:'n'},
+  'api-status': {title:'API Connection Status', cls:'n'},
+  'g-campaigns': {title:'Google Ads — Campaigns', cls:'g'},
+  'g-adgroups': {title:'Google Ads — Ad Groups', cls:'g'},
+  'g-keywords': {title:'Google Ads — Keywords', cls:'g'},
+  'g-reports': {title:'Google Ads — Reports', cls:'g'},
+  'm-campaigns': {title:'Meta Ads — Campaigns', cls:'m'},
+  'm-adsets': {title:'Meta Ads — Ad Sets', cls:'m'},
+  'm-ads': {title:'Meta Ads — Ads', cls:'m'},
+  'm-reports': {title:'Meta Ads — Reports', cls:'m'},
+};
+
+function doLogin(){
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('app-view').style.display = 'block';
+}
+
+function doLogout(){
+  document.getElementById('app-view').style.display = 'none';
+  document.getElementById('login-view').style.display = 'flex';
+}
+
+function nav(pageId, el, cls){
+  // Deactivate all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Activate target
+  document.getElementById('page-' + pageId).classList.add('active');
+  // Deactivate all nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.className = 'nav-item');
+  // Activate clicked nav item
+  el.classList.add('active-' + cls);
+  // Update topbar title
+  document.getElementById('topbar-title').textContent = pageMap[pageId].title;
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(e, id){
+  if(!e || e.target.classList.contains('modal-ov')){
+    document.getElementById(id).classList.remove('open');
+  }
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    document.querySelectorAll('.modal-ov.open').forEach(m => m.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
