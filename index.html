@@ -1240,10 +1240,21 @@ const pageMap = {
   'm-reports': {title:'Meta Ads — Reports', cls:'m'},
 };
 
+let currentRole = null;
+
+const USERS = [
+  { email: 'marketing@n3tworx.com', pass: 'passwordxyz', role: 'admin' },
+  { email: 'client@advertisingpro.xyz', pass: 'clientxyz',  role: 'client' }
+];
+
 function doLogin(){
-  const email = document.querySelector('input[type="email"]').value;
-  const pass = document.querySelector('input[type="password"]').value;
-  if(email === 'marketing@n3tworx.com' && pass === 'passwordxyz'){
+  const email = document.querySelector('input[type="email"]').value.trim();
+  const pass  = document.querySelector('input[type="password"]').value;
+  const user  = USERS.find(u => u.email === email && u.pass === pass);
+  if(user){
+    currentRole = user.role;
+    sectionUnlocked = false;
+    applyRole();
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('app-view').style.display = 'block';
   } else {
@@ -1252,8 +1263,19 @@ function doLogin(){
 }
 
 function doLogout(){
+  currentRole = null;
+  sectionUnlocked = false;
   document.getElementById('app-view').style.display = 'none';
   document.getElementById('login-view').style.display = 'flex';
+}
+
+function applyRole(){
+  const lockedTabs = document.querySelectorAll('.locked-tab');
+  if(currentRole === 'admin'){
+    lockedTabs.forEach(t => t.style.display = '');
+  } else {
+    lockedTabs.forEach(t => t.style.display = 'none');
+  }
 }
 
 function nav(pageId, el, cls){
@@ -1291,7 +1313,7 @@ let sectionUnlocked = false;
 let pendingNav = null;
 
 function navLocked(pageId, el, cls){
-  if(sectionUnlocked){
+  if(currentRole === 'admin' || sectionUnlocked){
     nav(pageId, el, cls);
     return;
   }
