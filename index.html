@@ -267,6 +267,28 @@ td.negative{color:var(--red);font-family:var(--font-m);font-size:11.5px;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px;}
+
+/* ---- Lock badge on nav items ---- */
+.locked-tab{opacity:0.7;}
+.locked-tab:hover{opacity:1;}
+.locked-tab .lock-badge{color:var(--text-2);}
+.locked-tab.active-g .lock-badge,.locked-tab.active-m .lock-badge{color:currentColor;opacity:0.8!important;}
+
+/* ---- Lock modal overlay ---- */
+.lock-modal-ov{display:none;position:fixed;inset:0;background:rgba(7,9,16,0.75);backdrop-filter:blur(6px);z-index:9999;align-items:center;justify-content:center;}
+.lock-modal-ov.open{display:flex;}
+.lock-modal-card{background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:36px 32px 28px;width:100%;max-width:360px;box-shadow:0 32px 72px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03);position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.lock-modal-icon{width:56px;height:56px;border-radius:14px;background:var(--surface-3);border:1px solid var(--border-2);display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--text-2);}
+.lock-modal-title{font-family:var(--font-h);font-size:17px;font-weight:700;letter-spacing:-0.4px;margin-bottom:6px;}
+.lock-modal-sub{font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:22px;max-width:280px;}
+.lock-modal-input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;color:var(--text);font-size:13px;font-family:var(--font-b);outline:none;transition:border-color .18s;margin-bottom:8px;text-align:center;letter-spacing:2px;}
+.lock-modal-input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(66,133,244,0.1);}
+.lock-modal-input::placeholder{letter-spacing:normal;color:var(--text-3);}
+.lock-modal-err{font-size:11.5px;color:var(--red);min-height:16px;margin-bottom:10px;}
+.lock-modal-btn{width:100%;padding:10px;background:var(--g);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all .18s;letter-spacing:0.2px;}
+.lock-modal-btn:hover{background:#3271d6;transform:translateY(-1px);box-shadow:0 4px 14px rgba(66,133,244,0.3);}
+.lock-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:4px;transition:color .15s;}
+.lock-modal-close:hover{color:var(--text);}
 </style>
 </head>
 <body>
@@ -331,9 +353,10 @@ td.negative{color:var(--red);font-family:var(--font-m);font-size:11.5px;}
 
       <hr class="nav-div">
       <div class="nav-label">Google Ads</div>
-      <div class="nav-item" onclick="nav('g-campaigns',this,'g')">
+      <div class="nav-item locked-tab" onclick="navLocked('g-campaigns',this,'g')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5l3-4 2.5 2.5 3-5.5 2 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Campaigns
+        <svg class="lock-badge" width="11" height="11" viewBox="0 0 14 14" fill="none" style="margin-left:auto;opacity:0.55;flex-shrink:0;"><rect x="2.5" y="6.5" width="9" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6.5V4.5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       </div>
       <div class="nav-item" onclick="nav('g-adgroups',this,'g')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="4" width="11" height="7" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 4V3a2 2 0 0 1 4 0v1" stroke="currentColor" stroke-width="1.4"/></svg>
@@ -350,17 +373,19 @@ td.negative{color:var(--red);font-family:var(--font-m);font-size:11.5px;}
 
       <hr class="nav-div">
       <div class="nav-label">Meta Ads</div>
-      <div class="nav-item" onclick="nav('m-campaigns',this,'m')">
+      <div class="nav-item locked-tab" onclick="navLocked('m-campaigns',this,'m')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5l3-4 2.5 2.5 3-5.5 2 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Campaigns
+        <svg class="lock-badge" width="11" height="11" viewBox="0 0 14 14" fill="none" style="margin-left:auto;opacity:0.55;flex-shrink:0;"><rect x="2.5" y="6.5" width="9" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6.5V4.5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       </div>
       <div class="nav-item" onclick="nav('m-adsets',this,'m')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="7" r="2.5" stroke="currentColor" stroke-width="1.4"/><circle cx="9.5" cy="7" r="2.5" stroke="currentColor" stroke-width="1.4"/></svg>
         Ad Sets
       </div>
-      <div class="nav-item" onclick="nav('m-ads',this,'m')">
+      <div class="nav-item locked-tab" onclick="navLocked('m-ads',this,'m')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="9" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 6.5l2.5 2L10 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Ads
+        <svg class="lock-badge" width="11" height="11" viewBox="0 0 14 14" fill="none" style="margin-left:auto;opacity:0.55;flex-shrink:0;"><rect x="2.5" y="6.5" width="9" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6.5V4.5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       </div>
       <div class="nav-item" onclick="nav('m-reports',this,'m')">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11.5V8m2.5 3.5V5.5M8 11.5V3m2.5 8.5V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -1260,6 +1285,64 @@ document.addEventListener('keydown', e => {
     document.querySelectorAll('.modal-ov.open').forEach(m => m.classList.remove('open'));
   }
 });
+
+/* ---- Locked tab logic ---- */
+let sectionUnlocked = false;
+let pendingNav = null;
+
+function navLocked(pageId, el, cls){
+  if(sectionUnlocked){
+    nav(pageId, el, cls);
+    return;
+  }
+  pendingNav = {pageId, el, cls};
+  document.getElementById('lock-modal-err').textContent = '';
+  document.getElementById('lock-modal-input').value = '';
+  document.getElementById('lock-modal').classList.add('open');
+  setTimeout(() => document.getElementById('lock-modal-input').focus(), 80);
+}
+
+function submitLockPassword(){
+  const val = document.getElementById('lock-modal-input').value;
+  if(val === 'passwordxyz'){
+    sectionUnlocked = true;
+    document.getElementById('lock-modal').classList.remove('open');
+    if(pendingNav) nav(pendingNav.pageId, pendingNav.el, pendingNav.cls);
+    pendingNav = null;
+  } else {
+    const err = document.getElementById('lock-modal-err');
+    err.textContent = 'Incorrect password.';
+    document.getElementById('lock-modal-input').value = '';
+    document.getElementById('lock-modal-input').focus();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lock-modal-input').addEventListener('keydown', e => {
+    if(e.key === 'Enter') submitLockPassword();
+  });
+  document.getElementById('lock-modal').addEventListener('click', e => {
+    if(e.target.id === 'lock-modal') {
+      e.target.classList.remove('open');
+      pendingNav = null;
+    }
+  });
+});
 </script>
+
+<!-- Lock modal -->
+<div id="lock-modal" class="lock-modal-ov">
+  <div class="lock-modal-card">
+    <div class="lock-modal-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div class="lock-modal-title">Restricted Section</div>
+    <div class="lock-modal-sub">This section contains private information. Enter the password to continue.</div>
+    <input id="lock-modal-input" class="lock-modal-input" type="password" placeholder="Enter password">
+    <div id="lock-modal-err" class="lock-modal-err"></div>
+    <button class="lock-modal-btn" onclick="submitLockPassword()">Unlock</button>
+    <button class="lock-modal-close" onclick="document.getElementById('lock-modal').classList.remove('open');pendingNav=null;">✕</button>
+  </div>
+</div>
 </body>
 </html>
